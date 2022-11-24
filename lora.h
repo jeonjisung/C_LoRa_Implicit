@@ -20,5 +20,7 @@ void Rx();
 void write_fifo(u8* buffer, u8 size);
 void read_fifo(u8* buffer, u8 size);
 void Send(u8* buffer, u8 size);
+void RxTimeout_interrupt();
+void RxTxDone_interrupt();
 
 #endif // !1
