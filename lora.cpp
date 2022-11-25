@@ -12,7 +12,8 @@ void lora_init()
     // FSK/OK MODE, LoRa 모드로 전환하기 위해 LongRangeMode 설정
     write_reg_single(REG_LR_OPMODE, (read_reg_single(REG_LR_OPMODE) & RFLR_OPMODE_LONGRANGEMODE_MASK) | RFLR_OPMODE_LONGRANGEMODE_ON);
     write_reg_single(REG_LR_OPMODE, (read_reg_single(REG_LR_OPMODE) & RFLR_OPMODE_FREQMODE_ACCESS_MASK) | RFLR_OPMODE_FREQMODE_ACCESS_HF);
-
+    write_reg_single(REG_LR_MODEMCONFIG1, (read_reg_single(REG_LR_MODEMCONFIG1) & RFLR_MODEMCONFIG1_IMPLICITHEADER_MASK) | RFLR_MODEMCONFIG1_IMPLICITHEADER_ON);
+	write_reg_single(REG_LR_PAYLOADLENGTH, 0x80);
     // DIO 0 에서 DIO 3으로 매핑, 기본값을 가지는 이유 : DIO 0~3의 기능들을 사용하기 위해.
     write_reg_single(REG_LR_DIOMAPPING1, 0x00);
     // Implicit Header Mode, 전송시간 줄이는데 사용
@@ -26,7 +27,7 @@ void set_channel(u32 frequency)
     u32 frf = frequency / FSTEP;
     // MSB(Most Significant Bit)
     write_reg_single(REG_LR_FRFMSB, (frf & 0xFFFFFF) >> 16);
-    //중간 자리 비트
+    // 중간 자리 비트
     write_reg_single(REG_LR_FRFMID, (frf & 0xFFFF) >> 8);
     // LSB(Least Significant Bit)
     write_reg_single(REG_LR_FRFLSB, (frf & 0xFF));
@@ -68,15 +69,6 @@ void idle_mode(void)
     write_reg_single(REG_LR_OPMODE, (read_reg_single(REG_LR_OPMODE) & RFLR_OPMODE_MASK) | RFLR_OPMODE_STANDBY);
 }
 
-void write_fifo(u8 *buffer, u8 size)
-{
-    write_reg_multi(0, buffer, size);
-}
-
-void read_fifo(u8 *buffer, u8 size)
-{
-    read_reg_multi(0, buffer, size);
-}
 
 void Tx()
 {
@@ -88,6 +80,7 @@ void Tx()
                                               RFLR_IRQFLAGS_FHSSCHANGEDCHANNEL |
                                               RFLR_IRQFLAGS_CADDETECTED);
 
+    // DIO0=TxDone
     write_reg_single(REG_LR_DIOMAPPING1, (read_reg_single(REG_LR_DIOMAPPING1) & RFLR_DIOMAPPING1_DIO0_MASK) | RFLR_DIOMAPPING1_DIO0_01);
 
     set_mode(RFLR_OPMODE_TRANSMITTER);
@@ -104,6 +97,7 @@ void Rx()
                          RFLR_IRQFLAGS_FHSSCHANGEDCHANNEL |
                          RFLR_IRQFLAGS_CADDETECTED);
 
+    // DIO0=RxDone
     write_reg_single(REG_LR_DIOMAPPING1, (read_reg_single(REG_LR_DIOMAPPING1) & RFLR_DIOMAPPING1_DIO0_MASK) | RFLR_DIOMAPPING1_DIO0_00);
     write_reg_single(REG_LR_DIOMAPPING1, (read_reg_single(REG_LR_DIOMAPPING1) & RFLR_DIOMAPPING1_DIO1_MASK) | RFLR_DIOMAPPING1_DIO1_00);
 
@@ -133,4 +127,33 @@ void Send(u8 *buffer, u8 size)
     // write_reg_single payload buffer
     write_fifo(buffer, size);
     Tx();
+}
+
+void RxTimeout_interrupt()
+{
+    //IRQFLAGS를 읽어옴. IRQ : Interrupt Request
+    printf("IRQ : 0x%2x\r\n", read_reg_single(REG_LR_IRQFLAGS));
+    printf("-----TIMEOUT-----\r\n");
+    write_reg_single(REG_LR_IRQFLAGS, RFLR_IRQFLAGS_RXTIMEOUT);
+    idle_mode();
+}
+
+void RxTxDone_interrupt()
+{
+    printf("IRQ : 0x%2x\r\n", read_reg_single(REG_LR_IRQFLAGS));
+    if (read_reg_single(REG_LR_IRQFLAGS) == 0x40)
+    {
+        printf("-----RXDONE-----\r\n");
+        //RXDONE이 나오면 패킷 수신 완료. 
+        write_reg_single(REG_LR_IRQFLAGS, RFLR_IRQFLAGS_RXDONE);
+        //rxtxbuf의 수신된 바이트수를 읽어옴.
+        read_fifo(rxtxbuf, read_reg_single(REG_LR_RXNBBYTES));
+        printf("[%s]\r\n", rxtxbuf);
+    }
+    else if (read_reg_single(REG_LR_IRQFLAGS) == 0x08)
+    {
+        write_reg_single(REG_LR_IRQFLAGS, RFLR_IRQFLAGS_RXDONE);
+        printf("-----TXDONE-----\r\n");
+    }
+    idle_mode();
 }

@@ -50,3 +50,13 @@ void read_reg_multi(u8 reg, u8* buffer, u8 size)
 
 	NSS_HIGH;
 }
+
+void write_fifo(u8 *buffer, u8 size)
+{
+    write_reg_multi(0, buffer, size);
+}
+
+void read_fifo(u8 *buffer, u8 size)
+{
+    read_reg_multi(0, buffer, size);
+}
