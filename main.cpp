@@ -11,7 +11,6 @@ int count = 0;
 
 int main()
 {
-    printf("ggilggilggilggil\n\r");
     DIO0.mode(PullDown);
     DIO1.mode(PullDown);
 

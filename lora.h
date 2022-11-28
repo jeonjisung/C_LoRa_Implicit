@@ -2,7 +2,7 @@
 #define LORA_H
 #include "spi.h"
 
-#define CH20 911500000
+#define CH20 921500000
 #define FSTEP 61
 
 #define RX_BUFFER_SIZE 256
@@ -22,5 +22,5 @@ void Rx();
 void Send(u8* buffer, u8 size);
 void RxTimeout_interrupt();
 void RxTxDone_interrupt();
-
+void set_paboost();
 #endif // !1
