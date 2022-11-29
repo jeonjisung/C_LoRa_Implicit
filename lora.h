@@ -2,7 +2,7 @@
 #define LORA_H
 #include "spi.h"
 
-#define CH20 921500000
+#define CH20 921100000
 #define FSTEP 61
 
 #define RX_BUFFER_SIZE 256

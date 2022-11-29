@@ -16,7 +16,7 @@ void lora_init()
 	// write_reg_single(REG_LR_PAYLOADLENGTH, 0x80);
     // DIO 0 에서 DIO 3으로 매핑, 기본값을 가지는 이유 : DIO 0~3의 기능들을 사용하기 위해.
     write_reg_single(REG_LR_DIOMAPPING1, 0x00);
-    //set_paboost();
+    set_paboost();
     set_modemconfig2_rxpayloadcrcon(1);
     // SF(확산계수) 설정
     set_modemconfig2_sf();
@@ -30,7 +30,7 @@ void set_channel(u32 frequency)
     // 중간 자리 비트
     write_reg_single(REG_LR_FRFMID, (frf & 0xFFFF) >> 8);
     // LSB(Least Significant Bit)
-    write_reg_single(REG_LR_FRFLSB, (frf & 0xFF));
+    write_reg_single(REG_LR_FRFLSB, frf & 0xFF);
 }
 
 void set_mode(u8 mode)
