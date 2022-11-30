@@ -12,11 +12,11 @@ void lora_init()
     // FSK/OK MODE, LoRa 모드로 전환하기 위해 LongRangeMode 설정
     write_reg_single(REG_LR_OPMODE, (read_reg_single(REG_LR_OPMODE) & RFLR_OPMODE_LONGRANGEMODE_MASK) | RFLR_OPMODE_LONGRANGEMODE_ON);
     write_reg_single(REG_LR_OPMODE, (read_reg_single(REG_LR_OPMODE) & RFLR_OPMODE_FREQMODE_ACCESS_MASK) | RFLR_OPMODE_FREQMODE_ACCESS_HF);
-    // write_reg_single(REG_LR_MODEMCONFIG1, (read_reg_single(REG_LR_MODEMCONFIG1) & RFLR_MODEMCONFIG1_IMPLICITHEADER_MASK) | RFLR_MODEMCONFIG1_IMPLICITHEADER_ON);
-	// write_reg_single(REG_LR_PAYLOADLENGTH, 0x80);
+    write_reg_single(REG_LR_MODEMCONFIG1, (read_reg_single(REG_LR_MODEMCONFIG1) & RFLR_MODEMCONFIG1_IMPLICITHEADER_MASK) | RFLR_MODEMCONFIG1_IMPLICITHEADER_ON);
+	write_reg_single(REG_LR_PAYLOADLENGTH, 0x80);
     // DIO 0 에서 DIO 3으로 매핑, 기본값을 가지는 이유 : DIO 0~3의 기능들을 사용하기 위해.
     write_reg_single(REG_LR_DIOMAPPING1, 0x00);
-    set_paboost();
+    // set_paboost();
     set_modemconfig2_rxpayloadcrcon(1);
     // SF(확산계수) 설정
     set_modemconfig2_sf();

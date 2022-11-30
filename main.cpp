@@ -6,7 +6,7 @@ Serial pc(PA_9, PA_10);
 InterruptIn DIO0(PB_6);
 InterruptIn DIO1(PB_7);
 
-u8 writebuf[] = "asdfg";
+u8 writebuf[] = "aaaaa";
 int count = 0;
 
 int main()
@@ -30,6 +30,6 @@ int main()
         wait(1);
         printf("write:%s\r\n", writebuf);
         Send(writebuf, 5);
-        wait(0.1);
+        wait(0.5);
     }
 }
